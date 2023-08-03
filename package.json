@@ -1,0 +1,67 @@
+{
+  "name": "minecraft-server-cli",
+  "version": "0.0.0",
+  "description": "A CLI application to manage and launch a minecraft server.",
+  "author": "TheAce0296",
+  "bin": {
+    "minecraft-server-cli": "./bin/run"
+  },
+  "homepage": "https://github.com/TheAce0296/minecraft-server-cli",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "repository": "TheAce0296/minecraft-server-cli",
+  "files": [
+    "/bin",
+    "/dist",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "dependencies": {
+    "@oclif/core": "^2",
+    "@oclif/plugin-help": "^5",
+    "@oclif/plugin-plugins": "^2.4.7"
+  },
+  "devDependencies": {
+    "@oclif/test": "^2.4.0",
+    "@types/node": "^16.18.39",
+    "eslint": "^7.32.0",
+    "eslint-config-oclif": "^4",
+    "eslint-config-oclif-typescript": "^1.0.3",
+    "oclif": "^3.10.0",
+    "shx": "^0.3.3",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.6.1",
+    "typescript": "^4.9.5"
+  },
+  "oclif": {
+    "bin": "minecraft-server-cli",
+    "dirname": "minecraft-server-cli",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
+    ],
+    "topicSeparator": " ",
+    "topics": {
+      "hello": {
+        "description": "Say hello to the world and others"
+      }
+    }
+  },
+  "scripts": {
+    "build": "shx rm -rf dist && tsc -b",
+    "lint": "eslint . --ext .ts --config .eslintrc",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "prepack": "npm run build && oclif manifest && oclif readme",
+    "test": "npm run lint",
+    "version": "oclif readme && git add README.md"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "bugs": "https://github.com/TheAce0296/minecraft-server-cli/issues",
+  "keywords": [
+    "oclif"
+  ],
+  "types": "dist/index.d.ts"
+}
