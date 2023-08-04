@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
+import crypto, { createHash } from 'node:crypto';
 import { PipelineSource, Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream as WebReadableStream } from 'node:stream/web';
@@ -38,13 +38,27 @@ export async function getPaperBuildsForVersion(version: string) {
   return (builds as number[]).sort((a, b) => b - a);
 }
 
-export async function downloadPaperBuild(version: string, build: number | string, destDir: string) {
+export async function downloadPaperBuild(
+  version: string,
+  build: number | string,
+  serverDirectory: string,
+  destDir: string,
+) {
   const response = await fetch(`https://api.papermc.io/v2/projects/paper/versions/${version}/builds/${build}`);
   if (!response.ok) throw new FetchError(response);
   const { downloads } = await response.json();
   if (!downloads?.application?.sha256 || !downloads?.application?.name)
     throw new Error(`No suitable Paper download found for [[version: ${version}]] [[build: ${build}]]`);
+
   const { name, sha256 } = downloads.application;
+  const serverJarFile = path.resolve(serverDirectory, name);
+  if (fs.existsSync(serverJarFile)) {
+    const hash = createHash('sha256');
+    const stream = fs.createReadStream(serverJarFile, { flags: 'r' });
+    await pipeline(stream, hash);
+    if (hash.digest('hex') === sha256) return serverJarFile;
+  }
+
   const downloadResponse = await fetch(
     `https://api.papermc.io/v2/projects/paper/versions/${version}/builds/${build}/downloads/${name}`,
   );
@@ -52,6 +66,10 @@ export async function downloadPaperBuild(version: string, build: number | string
   if (downloadResponse.headers.get('Content-Type') !== 'application/java-archive')
     throw new Error('Download file was not of correct content type!');
   if (downloadResponse.body === null) throw new Error('Download file did not contain a response body!');
+
+  if (!fs.existsSync(destDir)) {
+    await fs.promises.mkdir(destDir, { recursive: true });
+  }
   const file = path.resolve(destDir, name);
   const stream = fs.createWriteStream(file, {
     flags: 'wx',
