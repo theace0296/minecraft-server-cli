@@ -33,9 +33,9 @@ module.exports = {
         project: path.join(process.cwd(), 'tsconfig.json'),
       },
       rules: {
+        'prefer-destructuring': 'off',
         'no-restricted-syntax': 'off',
         'max-classes-per-file': 'off',
-        'class-methods-use-this': 'off',
         'prettier/prettier': [
           'error',
           {
