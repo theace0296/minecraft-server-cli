@@ -1,3 +1,4 @@
+/* eslint-disable unused-imports/no-unused-vars */
 /* eslint-disable unused-imports/no-unused-imports */
 /* eslint-disable import/no-extraneous-dependencies */
 import fs from 'node:fs';
