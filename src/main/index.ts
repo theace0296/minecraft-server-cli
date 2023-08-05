@@ -72,6 +72,12 @@ export default class Main extends Command {
       description: 'Directory of the Minecraft Server',
       default: baseConfig.serverDirectory,
     }),
+    writeConfig: Flags.boolean({
+      char: 'w',
+      description: 'Update Minecraft Server CLI config file.',
+      default: true,
+      allowNo: true,
+    }),
     version: Flags.string({
       char: 'v',
       description: 'Minecraft Version',
@@ -88,12 +94,6 @@ export default class Main extends Command {
       description: 'Paper build to use',
       default: baseConfig.build,
       dependsOn: ['paper'],
-    }),
-    writeConfig: Flags.boolean({
-      char: 'w',
-      description: 'Update Minecraft Server CLI config file.',
-      default: true,
-      allowNo: true,
     }),
   };
 
