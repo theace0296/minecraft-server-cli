@@ -3,9 +3,10 @@ import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import inquirer from 'inquirer';
 import { getPaperMCVersions, getPaperBuildsForVersion, downloadPaperBuild } from './utilities';
-import type { MainFlags, Config } from '../main';
+import type { MainFlags, Config, MainInstance } from '../main';
 
 export default async function Paper(
+  this: MainInstance,
   flags: MainFlags,
   updateConfig: (newConfig: Config | ((newConfig: Config) => Config)) => void,
 ) {
@@ -14,7 +15,7 @@ export default async function Paper(
   if (!paper) return null;
 
   if (!version) {
-    const paperMcVersions = await getPaperMCVersions();
+    const paperMcVersions = await getPaperMCVersions.call(this);
     if (interactive) {
       const responses = await inquirer.prompt([
         {
@@ -31,13 +32,14 @@ export default async function Paper(
     updateConfig(config => ({ ...config, version }));
   }
   if (build === 'latest') {
-    const paperBuilds = await getPaperBuildsForVersion(version);
+    const paperBuilds = await getPaperBuildsForVersion.call(this, version);
     build = paperBuilds[0].toString();
     updateConfig(config => ({ ...config, build }));
   }
 
+  this.log('Checking for updates to Paper...');
   const downloadDirectory = path.resolve(serverDirectory, randomBytes(6).toString('hex'));
-  const paperJarFile = await downloadPaperBuild(version, build, serverDirectory, downloadDirectory);
+  const paperJarFile = await downloadPaperBuild.call(this, version, build, serverDirectory, downloadDirectory);
 
   // Move downloaded file to server directory and remove the temp dir
   const finalPaperJarFile = path.resolve(serverDirectory, path.basename(paperJarFile));

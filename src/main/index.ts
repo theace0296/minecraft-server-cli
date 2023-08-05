@@ -12,6 +12,7 @@ const baseConfig = {
   paper: false,
   build: 'latest',
   serverJar: 'minecraft_server.jar',
+  plugins: [],
 };
 
 async function loadUserConfig(configFile: string, flags: MainFlags) {
@@ -95,6 +96,12 @@ export default class Main extends Command {
       default: baseConfig.build,
       dependsOn: ['paper'],
     }),
+    updatePlugins: Flags.boolean({
+      description: 'Update plugins',
+      default: baseConfig.paper,
+      dependsOn: ['paper'],
+      allowNo: false,
+    }),
   };
 
   async run(): Promise<void> {
@@ -109,7 +116,7 @@ export default class Main extends Command {
     this.logJson(flags);
     if (flags.paper) {
       updateConfig(config => ({ ...config, paper: true }));
-      const paperJar = await Paper(flags, updateConfig);
+      const paperJar = await Paper.call(this, flags, updateConfig);
       if (paperJar) updateConfig(config => ({ ...config, serverJar: path.basename(paperJar) }));
     } else {
       updateConfig(config => ({ ...config, paper: false }));
@@ -120,3 +127,5 @@ export default class Main extends Command {
     }
   }
 }
+
+export type MainInstance = Main;

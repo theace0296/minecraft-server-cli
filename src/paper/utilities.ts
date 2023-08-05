@@ -5,6 +5,7 @@ import { PipelineSource, Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream as WebReadableStream } from 'node:stream/web';
 import semver from 'semver';
+import type { MainInstance } from '../main';
 
 const sha256HashPipeline = async (source: PipelineSource<any>, destination: fs.WriteStream) => {
   const sha256Hash = crypto.createHash('sha256');
@@ -18,20 +19,20 @@ const sha256HashPipeline = async (source: PipelineSource<any>, destination: fs.W
   return sha256Hash.digest('hex');
 };
 
-class FetchError extends Error {
+export class FetchError extends Error {
   constructor(response: Response) {
     super(`${response.status} :: ${response.statusText}`);
   }
 }
 
-export async function getPaperMCVersions() {
+export async function getPaperMCVersions(this: MainInstance) {
   const response = await fetch('https://api.papermc.io/v2/projects/paper');
   if (!response.ok) throw new FetchError(response);
   const { versions } = await response.json();
   return (versions as string[]).sort((a, b) => semver.coerce(b)?.compare(semver.coerce(a)!)!);
 }
 
-export async function getPaperBuildsForVersion(version: string) {
+export async function getPaperBuildsForVersion(this: MainInstance, version: string) {
   const response = await fetch(`https://api.papermc.io/v2/projects/paper/versions/${version}`);
   if (!response.ok) throw new FetchError(response);
   const { builds } = await response.json();
@@ -39,6 +40,7 @@ export async function getPaperBuildsForVersion(version: string) {
 }
 
 export async function downloadPaperBuild(
+  this: MainInstance,
   version: string,
   build: number | string,
   serverDirectory: string,
@@ -53,12 +55,14 @@ export async function downloadPaperBuild(
   const { name, sha256 } = downloads.application;
   const serverJarFile = path.resolve(serverDirectory, name);
   if (fs.existsSync(serverJarFile)) {
+    this.log('Paper is already up-to-date.');
     const hash = createHash('sha256');
     const stream = fs.createReadStream(serverJarFile, { flags: 'r' });
     await pipeline(stream, hash);
     if (hash.digest('hex') === sha256) return serverJarFile;
   }
 
+  this.log(`Downloading Paper: [[version: ${version}]] [[build: ${build}]]`);
   const downloadResponse = await fetch(
     `https://api.papermc.io/v2/projects/paper/versions/${version}/builds/${build}/downloads/${name}`,
   );

@@ -34,10 +34,13 @@
     "@oclif/core": "^2",
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-plugins": "^2.4.7",
+    "adm-zip": "^0.5.10",
     "inquirer": "^8.2.6",
-    "semver": "^7.5.4"
+    "semver": "^7.5.4",
+    "yaml": "^2.3.1"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.0",
     "@types/inquirer": "^9.0.3",
     "@types/node": "^18.17.2",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
